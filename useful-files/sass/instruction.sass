@@ -1,0 +1,157 @@
+
+                                            /// СИМВОЛ &
+&   // - ссылка на родительский селектор, каким он компилируется в CSS
+
+@mixin does-parent-exist
+  @if &
+    &:hover
+      color: red
+  @else
+    a
+      color: red
+
+
+                                            /// ИНТЕРПОЛЯЦИЯ     -->     #{}
+p:before
+  content: "Я съел #{5 + 10} пирогов!"
+
+  font: #{$font-size}/#{$line-height}
+  // ->
+  font: 12px/30px
+
+$name: foo
+$attr: border
+p.#{$name}
+  #{$attr}-color: blue
+// ->
+p.foo
+  border-color: blue
+
+
+                                            /// ДЕРЕКТИВЫ
+
+// @IMPORT
+@import "foo"   // при импорте .sass может использовать переменные/миксины из этого файла
+@import "_foo.sass"  // не будет компилировать напрямую в CSS-файл
+
+// @EXTEND
+.error
+ border: 1px #f00
+ background-color: #fdd
+
+.seriousError
+  @extend .error
+  border-width: 3px
+
+.hoverLink
+  @extend a:hover
+
+
+a.important
+    @extend .notice !optional  // при optional не будет создавать новых селекторов
+
+
+// @AT-ROOT - изымает одно или несколько правил из родительского селектора в корневой уровень документа.
+.parent
+  ...
+  @at-root .child
+// ->
+.parent {}
+.child {}
+
+
+
+                                            /// УПРАВЛЯЮЩИЕ ДЕРЕКТИВЫ И ВЫРАЖЕНИЯ
+
+
+
+// SASS поддерживает групировку свойств по пространству имён
+.funky
+  font:
+    family: fantasy
+    size: 30em
+    weight: bold
+
+
+
+                                            /// ШАБЛОННЫЕ СЕЛЕКТОРЫ
+%inline-type
+  display: inline-block
+  margin-right: -4px
+  vertical-align: top
+
+.sgrid-N
+  @extend %inline-type
+
+
+
+                                            /// ПЕРЕМЕННЫЕ
+// $main_width = $main-width
+$width: 5em
+
+$content: "Новый тестовый текст?" !default  // default - если переменная еще не была обьявлена примет это значение
+
+#main
+  $width: 5em !global  // global - указывает что нужно обьявить переменную глоб. а не только на этом уровне вложености
+  width: $width
+
+
+
+                                            /// ТИПЫ ДАННЫХ
+
+// -- СТРОКИ
+// могут быть быть в "" и в '' и без них
+// что бы цвет не сжимался SASS-ом, нужно заключать в кавычки
+
+// -- МАПЫ
+$status-colors: (
+  primary: #000,
+  success: #27BA6C,
+  info: #03a9f4,
+  warning: #FF8833,
+  danger: #ff1a1a
+)
+
+.message
+  @each $status, $color in $status-colors
+    &--#{$status}
+      background: $color
+
+
+
+                                            /// ОПЕРАЦИИ
+
+// деление
+a
+  font: 10px/8px              // Явный CSS, деление отсутствует
+  $width: 1000px
+  width: $width/2             // Используется переменная, операция деления
+  width: round(1.5)/2         // Используется функция, операция деления
+  height: (500px/2)           // Обособление скобками, операция деления
+  margin-left: 5px + 8px/2px  // Используется +, операция деления
+
+
+// строки
+p
+  cursor: e + -resize
+  // ->
+  cursor: e-resize
+
+
+  content: "Foo " + Bar
+  font-family: sans- + "serif"
+  // ->
+  content: "Foo Bar"
+  font-family: sans-serif
+
+
+// логические операции
+// and, or, not
+$menuOn: true
+$menuDropDown: false
+
+.menu li
+  color: #ff0000
+  text-decoration: underline
+  @if $menuOn == true and $menuDropDown == true
+    position: relative
