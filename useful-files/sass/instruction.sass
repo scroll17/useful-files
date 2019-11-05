@@ -34,6 +34,11 @@ p.foo
 @import "foo"   // при импорте .sass может использовать переменные/миксины из этого файла
 @import "_foo.sass"  // не будет компилировать напрямую в CSS-файл
 
+// @DEBUG
+@debug 10em + 12em
+// ->
+"Line 1 DEBUG: 22em"
+
 // @EXTEND
 .error
  border: 1px #f00
@@ -58,6 +63,127 @@ a.important
 // ->
 .parent {}
 .child {}
+
+
+// @IF
+$type: monster
+p
+ @if $type == ocean
+     color: blue
+ @else if $type == matador
+     color: red
+ @else if $type == monster
+     color: green
+ @else
+     color: black
+
+
+// @FOR  --->  @for $var from <начало> through <конец>
+@for $i from 1 through 2
+   .item-#{$i}
+      width: 2em * $i
+// ->
+.item-1
+  width: 2em
+.item-2
+  width: 4em
+
+
+
+// @EACH  --->  @each $var in <список или карта значений>
+@each $animal in puma, sea-slug, ...
+   .#{$animal}-icon
+       background-image: url('/images/#{$animal}.png')
+// ->
+.puma-icon
+  background-image: url('/images/puma.png')
+.sea-slug-icon
+  background-image: url('/images/sea-slug.png')
+
+// n:
+@each $animal, $color, $cursor in (puma, black, default),(sea-slug, blue, pointer),(egret, white, move)
+// n:
+@each $header, $size in (h1: 2em, h2: 1.5em, h3: 1.2em)
+ #{$header}
+     font-size: $size
+
+
+
+// @WHILE
+$i: 6
+@while $i > 0
+  .item-#{$i}
+    width: 2em * $i
+  $i: $i - 2
+// ->
+.item-6
+  width: 12em
+.item-4
+  width: 8em
+
+
+                                            /// ФУНКЦИИ
+
+$grid-width: 40px
+$gutter-width: 10px
+
+@function grid-width($n)
+  @return $n * $grid-width + ($n - 1) * $gutter-width
+#sidebar
+   width: grid-width(5)
+// ->
+#sidebar
+    width: 240px
+
+
+
+                                            /// МИКСИНЫ
+
+// @MIXIN -> "="
+// @include mixName -> +mixName
+
+// n:
+=large-text
+  font:
+     family: Arial
+     size: 20px
+     weight: bold
+  color: #ff0000
+
+// n:
+@mixin silly-links
+   a
+     color: blue
+     background-color: red
+
+@include silly-links
+
+// n:
+=transform($property)
+   -webkit-transform: $property
+    -ms-transform: $property
+    transform: $property
+.box
+  +transform(rotate(30deg))
+
+// n:
+@mixin box-shadow($shadows...)
+  box-shadow: $shadows
+.shadows
+   @include box-shadow(0px 4px 5px #666, 2px 6px 10px #999)
+
+
+// n:               СОДЕРЖИТ БЛОКИ СО СТИЛЯМИ -> @CONTENT ЗАМЕНЯЕТЬСЯ НА СТИЛИ
+=apply-to-ie6-only
+  * html
+    @content
+  +apply-to-ie6-only
+    #logo
+      background-image: url("/logo.gif")
+// ->
+* html #logo
+   background-image: url(/logo.gif)
+
 
 
 
@@ -88,6 +214,11 @@ a.important
                                             /// ПЕРЕМЕННЫЕ
 // $main_width = $main-width
 $width: 5em
+
+$values: #ff0000, #00ff00, #0000ff
+.primary
+  @include colors($values...)
+
 
 $content: "Новый тестовый текст?" !default  // default - если переменная еще не была обьявлена примет это значение
 
