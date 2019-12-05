@@ -1,0 +1,157 @@
+## QUERY - ПАРАЛЕЛЬНО
+## MUTATION - ПОСЛЕДОВАТЕЛЬНО
+
+## ПОЛЯ
+{
+  hero {    # Обьект
+    name    # Поле
+  }
+}
+
+
+## АРГУМЕНТЫ
+{
+  human(id: "1000") {   # Аргумент
+    name
+    height(unit: FOOT)  # Преобразование данных на сервере, а не для каждого клиента
+  }
+}
+
+
+## ПСЕВДОНИМЫ
+{
+  empireHero: hero(episode: EMPIRE) {  # empireHero - синоним для запроса одинаковых обьектов
+    name
+  }
+  jediHero: hero(episode: JEDI) {
+    name
+  }
+}
+
+
+## ФРАГМЕНТЫ
+{
+  leftComparison: hero(episode: EMPIRE) {
+    ...comparisonFields                     # используем фрагменты
+  }
+  rightComparison: hero(episode: JEDI) {
+    ...comparisonFields                     # используем фрагменты
+  }
+}
+
+fragment comparisonFields on Character {    # созаём поля для повторного их использования (фрагмент)
+  name
+  appearsIn
+  friends {
+    name
+  }
+}
+
+fragment comparisonFields on Character {    # использование фрагментов с переменными
+  name
+  friendsConnection(first: $first) {
+    totalCount
+  }
+}
+
+
+## ВСТРОЕННЫЕ ФРАГМЕНТЫ
+# Если вы запрашиваете поле, которое возвращает интерфейс или тип объединения -  нужно использовать встроенные фрагменты для доступа к данным на конкретном типе
+query HeroForEpisode($ep: Episode!) {
+  hero(episode: $ep) {
+    name
+    ... on Droid {
+      primaryFunction
+    }
+    ... on Human {
+      height
+    }
+  }
+}
+# В запросе поле hero - возвращает тип Character (либо Human, либо Droid в зависимости от episode)
+
+
+
+## ОПЕРАЦИИ ---  query, mutation, subscription
+# query - тип операции
+# HeroNameAndFriends - имя операции (operation name)
+query HeroNameAndFriends {
+  hero {
+    name
+    friends {
+      name
+    }
+  }
+}
+
+
+## ПЕРЕМЕННЫЕ
+# $episode - переменная (необязательная) (! - обязательная)
+# Episode - тип переменной (Int, String...)
+query HeroNameAndFriends($episode: Episode) {
+  hero(episode: $episode) {
+    name
+    friends {
+      name
+    }
+  }
+}
+
+query HeroNameAndFriends($episode: Episode = JEDI){   # значение по умолчанию
+  name
+}
+
+
+## ДЕРЕКТИВЫ
+query Hero($episode: Episode, $withFriends: Boolean!) {
+  hero(episode: $episode) {
+    name
+    friends @include(if: $withFriends) {  # деректива
+      name
+    }
+  }
+}
+# @include(if: Boolean) - включает поле если TRUE
+# @skip(if: Boolean) - - выключает поле если TRUE
+
+
+## МУТАЦИИ
+mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
+  createReview(episode: $ep, review: $review) {
+    stars
+    commentary
+  }
+}
+# JSON INPUT VALUE
+#  "ep": "JEDI",
+#  "review": {
+#    "stars": 5,
+#    "commentary": "This is a great movie!"
+#  }
+
+
+
+## МЕТА-ПОЛЯ
+# __typename - чтобы получить имя типа объекта в этой точке
+{
+  search(text: "an") {
+    __typename
+    ... on Human {
+      name
+    }
+    ... on Droid {
+      name
+    }
+    ... on Starship {
+      name
+    }
+  }
+}
+#   search возвращает тип объединения (в премере - один из трёх)
+#   "data": {
+#   "search": [
+#     {
+#       "__typename": "Human",
+#       "name": "Han Solo"
+#     },
+#    ...
