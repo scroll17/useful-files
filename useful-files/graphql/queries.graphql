@@ -38,7 +38,7 @@
     ...comparisonFields                     # используем фрагменты
   }
 }
-
+# Character - тип обьекта ??
 fragment comparisonFields on Character {    # созаём поля для повторного их использования (фрагмент)
   name
   appearsIn
@@ -46,7 +46,6 @@ fragment comparisonFields on Character {    # созаём поля для по�
     name
   }
 }
-
 fragment comparisonFields on Character {    # использование фрагментов с переменными
   name
   friendsConnection(first: $first) {
@@ -87,7 +86,7 @@ query HeroNameAndFriends {
 
 ## ПЕРЕМЕННЫЕ
 # $episode - переменная (необязательная) (! - обязательная)
-# Episode - тип переменной (Int, String...)
+# Episode - тип переменной (or Int, String...)
 query HeroNameAndFriends($episode: Episode) {
   hero(episode: $episode) {
     name
@@ -96,7 +95,6 @@ query HeroNameAndFriends($episode: Episode) {
     }
   }
 }
-
 query HeroNameAndFriends($episode: Episode = JEDI){   # значение по умолчанию
   name
 }
